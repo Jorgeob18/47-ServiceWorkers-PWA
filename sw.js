@@ -1,7 +1,9 @@
+/* eslint-disable arrow-body-style */
 const nombreCache = 'apv-v1';
 const assets = [
   './',
   './index.html',
+  './error.html',
   './css/bootstrap.css',
   './css/styles.css',
   './js/app.js',
@@ -34,9 +36,14 @@ self.addEventListener('activate', (e) => {
 // Evento fetch para descargar archivos estaticos
 
 self.addEventListener('fetch', (e) => {
-  console.log('Fetching Service Worker', e);
+  console.log('Fetch.. ', e);
 
   e.respondWith(
-    caches.match(e.request).then((respuestaCache) => respuestaCache)
+    caches
+      .match(e.request)
+      .then((respuestaCache) => {
+        return respuestaCache; // || fetch(e.request);
+      })
+      .catch(() => caches.match('/error.html'))
   );
 });
