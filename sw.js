@@ -1,13 +1,12 @@
 /* eslint-disable arrow-body-style */
-const nombreCache = 'apv-v1';
+const nombreCache = 'apv-v3';
 const assets = [
   './',
   './index.html',
   './error.html',
+  './js/app.js',
   './css/bootstrap.css',
   './css/styles.css',
-  './js/app.js',
-  './js/apv.js',
 ];
 
 // Cuando se instala el Service Worker
@@ -26,15 +25,25 @@ self.addEventListener('install', (e) => {
   // Revisar en App (Chrome) en Firefox en Almacenamiento
 });
 
-// Activar el service Worker
+// Activar el service worker...
 self.addEventListener('activate', (e) => {
-  console.log('Service Worker activated');
+  console.log('Service Worker Activado');
 
-  console.log(e);
+  // Actualizar la PWA //
+  e.waitUntil(
+    caches.keys().then((keys) => {
+      console.log(keys);
+
+      return Promise.all(
+        keys
+          .filter((key) => key !== nombreCache)
+          .map((key) => caches.delete(key)) // borrar los demas
+      );
+    })
+  );
 });
 
-// Evento fetch para descargar archivos estaticos
-
+// Fetch events para el CSS, HTML, imagenes JS, y hasta llamados a fetch..
 self.addEventListener('fetch', (e) => {
   console.log('Fetch.. ', e);
 
@@ -42,8 +51,8 @@ self.addEventListener('fetch', (e) => {
     caches
       .match(e.request)
       .then((respuestaCache) => {
-        return respuestaCache; // || fetch(e.request);
+        return respuestaCache || fetch(e.request);
       })
-      .catch(() => caches.match('/error.html'))
+      .catch(() => caches.match('./error.html')) // colocar puntoen la ruta, por eso no funcionaba
   );
 });
